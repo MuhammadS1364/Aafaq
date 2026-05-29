@@ -1,7 +1,7 @@
 
 
 import * as XLSX from "xlsx";
-import { supabase } from "../../lib/supabase";
+import { SupaBaseFunction } from "../../lib/SupaBase.js";
 
 export default function StudentImport({
   onImported,
@@ -24,7 +24,7 @@ export default function StudentImport({
       XLSX.utils.sheet_to_json(sheet);
 
     const { error } =
-      await supabase
+      await SupaBaseFunction
         .from("students")
         .insert(
           json.map((row) => ({

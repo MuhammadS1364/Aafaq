@@ -1,7 +1,7 @@
-import { SupaBaseFun } from "../lib/SupaBase";
+import { SupaBaseFunction } from "../lib/SupaBase";
 
-export const getStudents = async () => {
-  const { data, error } = await SupaBaseFun
+export async function getStudents() {
+  const { data, error } = await SupaBaseFunction
     .from("students")
     .select(`
       *,
@@ -9,27 +9,38 @@ export const getStudents = async () => {
     `)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error(error);
+    throw error;
+  }
 
   return data;
-};
+}
 
-export const createStudent = async (student) => {
-  const { data, error } = await SupaBaseFun
+export async function createStudent(student) {
+  const { data, error } = await SupaBaseFunction
     .from("students")
-    .insert(student)
+    .insert([student])
     .select();
 
-  if (error) throw error;
+  if (error) {
+    console.error(error);
+    throw error;
+  }
 
   return data;
-};
+}
 
-export const deleteStudent = async (id) => {
-  const { error } = await SupaBaseFun
+export async function deleteStudent(id) {
+  const { error } = await SupaBaseFunction
     .from("students")
     .delete()
     .eq("id", id);
 
-  if (error) throw error;
-};
+  if (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+console.log("studentService loaded");

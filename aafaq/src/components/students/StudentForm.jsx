@@ -1,14 +1,13 @@
-
-
-
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-import { createStudent } from "../../services/studentService";
+import { SupaBaseFunction } from "../../lib/SupaBase";
+
+
+import { createStudent } from "/../services/studentService.js";
 
 export default function StudentForm({ onAdded }) {
   const [teams, setTeams] = useState([]);
 
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     chest_no: "",
     student_name: "",
     class: "",
@@ -17,13 +16,19 @@ export default function StudentForm({ onAdded }) {
   });
 
   useEffect(() => {
-    fetchTeams();
+    loadTeams();
   }, []);
 
-  async function fetchTeams() {
-    const { data } = await supabase
+  async function loadTeams() {
+    const { data, error } = await SupaBaseFunction
       .from("teams")
-      .select("*");
+      .select("*")
+      .order("name");
+
+    if (error) {
+      console.error(error);
+      return;
+    }
 
     setTeams(data || []);
   }
@@ -31,96 +36,126 @@ export default function StudentForm({ onAdded }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    await createStudent(form);
+    try {
+      await createStudent(formData);
 
-    setForm({
-      chest_no: "",
-      student_name: "",
-      class: "",
-      category: "",
-      team_id: "",
-    });
+      setFormData({
+        chest_no: "",
+        student_name: "",
+        class: "",
+        category: "",
+        team_id: "",
+      });
 
-    onAdded();
+      if (onAdded) {
+        onAdded();
+      }
+
+      alert("Student Added Successfully");
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid gap-3 bg-white p-4 rounded-xl shadow"
-    >
-      <input
-        placeholder="Chest No"
-        value={form.chest_no}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            chest_no: e.target.value,
-          })
-        }
-      />
-
-      <input
-        placeholder="Student Name"
-        value={form.student_name}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            student_name: e.target.value,
-          })
-        }
-      />
-
-      <input
-        placeholder="Class"
-        value={form.class}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            class: e.target.value,
-          })
-        }
-      />
-
-      <input
-        placeholder="Category"
-        value={form.category}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            category: e.target.value,
-          })
-        }
-      />
-
-      <select
-        value={form.team_id}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            team_id: e.target.value,
-          })
-        }
-      >
-        <option value="">
-          Select Team
-        </option>
-
-        {teams.map((team) => (
-          <option
-            key={team.id}
-            value={team.id}
-          >
-            {team.name}
-          </option>
-        ))}
-      </select>
-
-      <button
-        className="bg-blue-500 text-white py-2 rounded"
-      >
+    <div className="bg-white rounded-xl shadow p-5">
+      <h2 className="text-xl font-bold mb-4">
         Add Student
-      </button>
-    </form>
+      </h2>
+
+      <form
+        onSubmit={handleSubmit}
+        className="grid gap-3"
+      >
+        <input
+          type="text"
+          placeholder="Chest No"
+          value={formData.chest_no}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              chest_no: e.target.value,
+            })
+          }
+          className="border p-2 rounded"
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Student Name"
+          value={formData.student_name}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              student_name: e.target.value,
+            })
+          }
+          className="border p-2 rounded"
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Class"
+          value={formData.class}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              class: e.target.value,
+            })
+          }
+          className="border p-2 rounded"
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Category"
+          value={formData.category}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              category: e.target.value,
+            })
+          }
+          className="border p-2 rounded"
+          required
+        />
+
+        <select
+          value={formData.team_id}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              team_id: e.target.value,
+            })
+          }
+          className="border p-2 rounded"
+          required
+        >
+          <option value="">
+            Select Team
+          </option>
+
+          {teams.map((team) => (
+            <option
+              key={team.id}
+              value={team.id}
+            >
+              {team.name}
+            </option>
+          ))}
+        </select>
+
+        <button
+          type="submit"
+          className="bg-blue-600 text-white p-2 rounded"
+        >
+          Add Student
+        </button>
+      </form>
+    </div>
   );
 }
